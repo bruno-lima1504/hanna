@@ -1,15 +1,11 @@
 import React from "react";
-import { registerRootComponent } from "expo";
-import { NavigationContainer } from "@react-navigation/native";
-import Routes from "./src/routes";
-import { AuthProvider } from "./src/contexts/AuthContext";
+import { View, Text } from "react-native";
 import Toast, {
   BaseToast,
   ErrorToast,
   ToastConfig,
   ToastConfigParams,
 } from "react-native-toast-message";
-import { StatusBar } from "react-native";
 
 const toastConfig: ToastConfig = {
   success: (props: ToastConfigParams<any>) => (
@@ -34,24 +30,12 @@ const toastConfig: ToastConfig = {
       }}
     />
   ),
+  // tomatoToast: ({ text1, props }: ToastConfigParams<{ uuid: string }>) => (
+  //   <View style={{ height: 60, width: "100%", backgroundColor: "tomato" }}>
+  //     <Text>{text1}</Text>
+  //     <Text>{props.uuid}</Text>
+  //   </View>
+  // ),
 };
 
-function App() {
-  return (
-    <NavigationContainer>
-      <AuthProvider>
-        <StatusBar
-          backgroundColor="#39BDF8"
-          barStyle="light-content"
-          translucent={false}
-        />
-        <Routes />
-        <Toast config={toastConfig} />
-      </AuthProvider>
-    </NavigationContainer>
-  );
-}
-
-export default App;
-
-registerRootComponent(App);
+export default toastConfig;
