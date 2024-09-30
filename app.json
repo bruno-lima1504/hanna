@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/adaptive-icon.png",
+        "foregroundImage": "./src/assets/images/HANNA-logo-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.limabruno1504.hannalog"

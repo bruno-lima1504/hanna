@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import { colors } from "@/constants/colors";
 import {
   View,
   Text,
@@ -13,8 +14,8 @@ import { AuthContext } from "../../contexts/AuthContext";
 
 import { useNavigation } from "@react-navigation/native";
 
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StackParamsList } from "../../routes/app.routes";
+// import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+// import { StackParamsList } from "../../routes/app.routes";
 
 import { api } from "../../services/api";
 
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1D1D2E",
+    backgroundColor: colors.light.background,
   },
   title: {
     fontSize: 30,

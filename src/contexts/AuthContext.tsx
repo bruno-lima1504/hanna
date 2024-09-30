@@ -57,7 +57,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       //pegar os dados salvos do user
       const userInfo = await AsyncStorage.getItem("@hanna");
       let hasUser: UserProps = JSON.parse(userInfo || "{}");
-      console.log(hasUser);
       if (Object.keys(hasUser).length > 0) {
         // api.defaults.headers.common['Authorization']= `Bearer ${hasUser.token}`
         setUser({
@@ -77,8 +76,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   async function signIn({ usuario, password }: SignInProps) {
     setLoadingAuth(true);
-    console.log(usuario);
-    console.log(password);
     try {
       const response = await api.post("/authentication", {
         usuario: usuario,

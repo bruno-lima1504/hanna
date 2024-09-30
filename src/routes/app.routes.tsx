@@ -1,53 +1,38 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import Dashboard from "../pages/Dashboard";
-// import Order from "../pages/Order";
-// import  FinishOrder  from "../pages/FinishOrder";
+import Separacao from "../pages/separacao";
+import CustomDrawerContent from "../components/DrawerContent";
 
-export type StackParamsList = {
+export type DrawerParamsList = {
   Dashboard: undefined;
-  Order: {
-    number: number | string;
-    order_id: string;
-  };
-  FinishOrder: {
-    number: number | string;
-    order_id: string;
-  };
+  Separacao: undefined;
 };
 
-const Stack = createNativeStackNavigator<StackParamsList>();
+const Drawer = createDrawerNavigator<DrawerParamsList>();
 
 function AppRoutes() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+    >
+      <Drawer.Screen
         name="Dashboard"
         component={Dashboard}
         options={{
           headerShown: false,
         }}
       />
-      {/* <Stack.Screen
-                name="Order"
-                component={Order}
-                options={{
-                    headerShown: false
-                }}
-            />
-            <Stack.Screen
-                name="FinishOrder"
-                component={FinishOrder}
-                options={{
-                    title: 'Finalizando',
-                    headerStyle:{
-                        backgroundColor: '#1d1d2e'
-                    },
-                    headerTintColor: '#FFF'
-                }}
-            /> */}
-    </Stack.Navigator>
+      <Drawer.Screen
+        name="Separacao"
+        component={Separacao}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Drawer.Navigator>
   );
 }
 
