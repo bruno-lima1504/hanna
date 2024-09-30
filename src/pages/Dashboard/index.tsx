@@ -6,7 +6,10 @@ import {
   SafeAreaView,
   TouchableOpacity,
   TextInput,
+  Button,
 } from "react-native";
+
+import { AuthContext } from "../../contexts/AuthContext";
 
 import { useNavigation } from "@react-navigation/native";
 
@@ -16,9 +19,18 @@ import { StackParamsList } from "../../routes/app.routes";
 import { api } from "../../services/api";
 
 export default function Dashboard() {
+  const { signOut } = useContext(AuthContext);
+
+  async function handleLogout() {
+    await signOut();
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>DASHBOARD</Text>
+      <TouchableOpacity onPress={handleLogout}>
+        <Text style={styles.title}>SAIR</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }

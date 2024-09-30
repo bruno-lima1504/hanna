@@ -7,22 +7,22 @@ import AuthRoutes from "./auth.routes";
 import { AuthContext } from "../contexts/AuthContext";
 
 function Routes() {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, loading } = useContext(AuthContext);
 
-  // if (loading) {
-  //   return (
-  //     <View
-  //       style={{
-  //         flex: 1,
-  //         backgroundColor: "#1D1D2E",
-  //         justifyContent: "center",
-  //         alignItems: "center",
-  //       }}
-  //     >
-  //       <ActivityIndicator size={60} color="#F5F7FB" />
-  //     </View>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#1D1D2E",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size={60} color="#F5F7FB" />
+      </View>
+    );
+  }
 
   return isAuthenticated ? <AppRoutes /> : <AuthRoutes />;
 }
