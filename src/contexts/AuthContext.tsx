@@ -12,6 +12,8 @@ type AuthContextData = {
   signIn: (credentials: SignInProps) => Promise<void>;
   credentialsMsg: boolean;
   signOut: () => Promise<void>;
+  getOrders: () => Promise<OrderProps[] | undefined>;
+  cleanRespOrder: () => Promise<void>;
 };
 
 type UserProps = {
@@ -31,6 +33,25 @@ type AuthProviderProps = {
 type SignInProps = {
   usuario: string;
   password: string;
+};
+
+export type OrderProps = {
+  id_pedidos: string;
+  num_pedido: string;
+  quantidade_itens: string;
+  filial: string;
+  cod_cliente: string;
+  loja: string;
+  data_liberacao: string;
+  status_separacao: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
+  controle_qualidade: string;
+  analise_fiscal: string;
+  calibracao: string;
+  responsavel: string;
+  prioridade: string;
 };
 
 export const AuthContext = createContext({} as AuthContextData);
@@ -131,6 +152,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
   }
 
+  async function getOrders(): Promise<OrderProps[] | undefined> {
+    const userInfo = await AsyncStorage.getItem("@hanna");
+    let user = JSON.parse(userInfo || "{}");
+    try {
+      const response = await api.post("/separacao", {
+        id_login: user.userId.toString(),
+      });
+      if (response.status === 200) {
+        return response.data as OrderProps[];
+      } else {
+        return undefined;
+      }
+    } catch (error) {
+      console.log(error);
+      return undefined;
+    }
+  }
+
+  async function cleanRespOrder(): Promise<void> {
+    try {
+      await api.put("/clearorderlist", {
+        id_login: user.userId,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -141,6 +190,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         loading,
         loadingAuth,
         credentialsMsg,
+        getOrders,
+        cleanRespOrder,
       }}
     >
       {children}
