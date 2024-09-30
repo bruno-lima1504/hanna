@@ -5,22 +5,22 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function OrderList({ data }: any) {
   const navigation = useNavigation();
-  function separeteOrders(order) {
-    const status = {
-      BQ: "Separar",
-      RP: "Trocar",
-      CF: "Conferir",
-      RC: "ConferirCQ",
-    };
+  //   function separeteOrders(order) {
+  //     const status = {
+  //       BQ: "Separar",
+  //       RP: "Trocar",
+  //       CF: "Conferir",
+  //       RC: "ConferirCQ",
+  //     };
 
-    if (data.status_separacao !== "RCF") {
-      const routeName: string = status[data.status_separacao];
+  //     if (data.status_separacao !== "RCF") {
+  //       const routeName: string = status[data.status_separacao];
 
-      navigation.navigate(routeName, {
-        pedido: order,
-      });
-    }
-  }
+  //       navigation.navigate(routeName, {
+  //         pedido: order,
+  //       });
+  //     }
+  //   }
 
   function formatarData(data) {
     const ano = data.substring(0, 4);
@@ -31,9 +31,9 @@ export default function OrderList({ data }: any) {
   return (
     <TouchableOpacity
       style={styles.orderCard}
-      onPress={() => {
-        separeteOrders(data.id_pedidos);
-      }}
+      //   onPress={() => {
+      //     separeteOrders(data.id_pedidos);
+      //   }}
     >
       <Text style={styles.orderNum}>Pedido: {data.num_pedido}</Text>
       <Text style={styles.bodyText}>

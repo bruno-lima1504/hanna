@@ -8,8 +8,8 @@ import {
 import Toast from "react-native-toast-message";
 
 import { AuthContext, OrderProps } from "../../contexts/AuthContext"; // Certifique-se de importar OrderProps
-import OrderList from "@/src/components/OrderList";
-import { colors } from "@/constants/colors";
+import OrderList from "../../components/OrderList";
+import { colors } from "../../../constants/colors";
 
 export default function Separacao() {
   const [orders, setOrders] = useState<OrderProps[]>([]);

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { colors } from "@/constants/colors";
+import { colors } from "../../../constants/colors";
 import {
   View,
   Text,
