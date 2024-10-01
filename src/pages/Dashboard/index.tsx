@@ -1,76 +1,126 @@
-import React, { useContext, useState } from "react";
-import { colors } from "../../../constants/colors";
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  TextInput,
-  Button,
-} from "react-native";
-
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import { View, Text, SafeAreaView, StyleSheet } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../contexts/AuthContext";
+import { colors } from "../../../constants/colors";
 
-import { useNavigation } from "@react-navigation/native";
-
-// import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-// import { StackParamsList } from "../../routes/app.routes";
-
-import { api } from "../../services/api";
+import DashboardCard from "../../components/DashboardCard";
 
 export default function Dashboard() {
-  const { signOut } = useContext(AuthContext);
+  const [separacao, setSeparacao] = useState(0);
+  const [conferencia, setConferencia] = useState(0);
+  const [controle, setControle] = useState(0);
+  const [troca, setTroca] = useState(0);
+  const { user, updateOrderList, cleanRespOrder, getDataDashBoard } =
+    useContext(AuthContext);
 
-  async function handleLogout() {
-    await signOut();
-  }
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      async function uploadDashBoard() {
+        if (isActive) {
+          try {
+            await cleanRespOrder();
+
+            await updateOrderList();
+
+            let data = await getDataDashBoard();
+            if (data.separacao.length != 0) {
+              setSeparacao(Number(data.separacao[0].qtd_pedidos));
+            }
+            if (data.conferencia.length != 0) {
+              setConferencia(Number(data.conferencia[0].qtd_pedidos));
+            }
+            if (data.controle.length != 0) {
+              setControle(Number(data.controle[0].qtd_pedidos));
+            }
+            if (data.troca.length != 0) {
+              setTroca(Number(data.troca[0].qtd_pedidos));
+            }
+          } catch (error) {
+            console.error("Error fetching clean", error);
+          } finally {
+          }
+        }
+      }
+      uploadDashBoard();
+    }, [])
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>DASHBOARD</Text>
-      <TouchableOpacity onPress={handleLogout}>
-        <Text style={styles.title}>SAIR</Text>
-      </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <Text style={styles.welcomeText}>Bem vindo, {user.name}!</Text>
+      </View>
+      <DashboardCard
+        bgColor="#1E90FF"
+        title="Separação"
+        textColor="white"
+        iconColor="white"
+        amount={separacao}
+        icon="clipboard"
+      />
+      <DashboardCard
+        bgColor="#17C434"
+        title="Conferência"
+        textColor="white"
+        iconColor="white"
+        amount={conferencia}
+        icon="check-circle"
+      />
+      <DashboardCard
+        bgColor="#F3EF0E"
+        title="Qualidade"
+        textColor="black"
+        iconColor="black"
+        amount={controle}
+        icon="search"
+      />
+      <DashboardCard
+        bgColor="#E94834"
+        title="Reprovados"
+        textColor="white"
+        iconColor="white"
+        amount={troca}
+        icon="refresh-cw"
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.light.background,
   },
-  title: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 24,
-  },
-  input: {
-    width: "90%",
-    height: 60,
-    backgroundColor: "#101026",
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    textAlign: "center",
-    fontSize: 22,
-    color: "#FFF",
-  },
-  button: {
-    width: "90%",
-    height: 40,
-    backgroundColor: "#3fffa3",
-    borderRadius: 4,
-    marginVertical: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
+  noOrdersText: {
     fontSize: 18,
-    color: "#101026",
-    fontWeight: "bold",
+    backgroundColor: "#D3D3D3", // Cor de fundo equivalente a "bg-slate-200"
+    borderRadius: 50,
+    padding: 10,
+    textAlign: "center",
+    width: 300,
+    marginTop: 20,
+  },
+  emptyText: {
+    marginTop: 5,
+    backgroundColor: "blue",
+  },
+  header: {
+    height: 48, // 12 in Tailwind would be 48px
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "flex-end",
+    backgroundColor: colors.light.background, // Tailwind's bg-blue-500
+    marginBottom: 12, // Tailwind's mb-3
+    padding: 8, // Tailwind's p-2
+    borderRadius: 8, // Tailwind's rounded-md
+  },
+  welcomeText: {
+    color: "white", // Tailwind's text-white
+    fontSize: 16, // Tailwind's text-base (16px)
+    fontWeight: "bold", // Tailwind's font-bold
   },
 });
