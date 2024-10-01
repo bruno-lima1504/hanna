@@ -18,13 +18,21 @@ type AuthContextData = {
     pedido: string
   ) => Promise<ProductOrderResponse | undefined>;
   saveSeparateProducts: (
-    produtcs: ProductProps[]
+    products: ProductProps[]
   ) => Promise<number | undefined>;
   printTag: (
     numPed: string,
     qtd: string,
     idPedido: string
   ) => Promise<PrintTagResponse>;
+  getOrdersToCheckOut: () => Promise<OrderProps[] | undefined>;
+  getProductsToCheckOut: (
+    pedido: string
+  ) => Promise<ProductOrderCheckOutResponse | undefined>; // Corrigido aqui
+  saveCheckOutProducts: (
+    products: ProductProps[], // Array de produtos
+    location: string
+  ) => Promise<number | undefined>;
 };
 
 type UserProps = {
@@ -81,6 +89,8 @@ export type ProductProps = {
   calibracao: string;
   status_produto_atual: string;
   prod_desc: string;
+  item: string | undefined | null;
+  conferido: string | number | undefined | null;
 };
 
 export type CardItemProps = {
@@ -89,6 +99,12 @@ export type CardItemProps = {
   localizacao: string;
   prod_desc: string;
   qtd_leituras: string;
+};
+
+export type ProductOrderCheckOutResponse = {
+  itens_pedido: ProductProps[];
+  itens_card: CardItemProps[];
+  awaitItems?: boolean; // Se esta propriedade pode ou não existir
 };
 
 export type ProductOrderResponse = {
@@ -312,6 +328,82 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function getOrdersToCheckOut() {
+    const userInfo = await AsyncStorage.getItem("@hannaStorage");
+    let user = JSON.parse(userInfo || "{}");
+    try {
+      const response = await api.post("/conferencia", {
+        id_login: user.userId,
+      });
+
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        return undefined;
+      }
+    } catch (error) {
+      console.log(error);
+      return undefined;
+    }
+  }
+
+  async function getProductsToCheckOut(
+    pedido: string
+  ): Promise<ProductOrderCheckOutResponse | undefined> {
+    try {
+      const response = await api.post("/conferir", {
+        pedido: pedido,
+      });
+      return response.data as ProductOrderCheckOutResponse;
+    } catch (error) {
+      console.log(error);
+      return undefined;
+    }
+  }
+
+  async function saveCheckOutProducts(
+    products: ProductProps[],
+    location: string
+  ) {
+    let checkedProducts = [];
+    const userInfo = await AsyncStorage.getItem("@hannaStorage");
+    let user = JSON.parse(userInfo || "{}");
+
+    products.map((product) => {
+      let item = {
+        id_produtos_pedido: product.id_produtos_pedido,
+        conferido: product.conferido,
+        num_pedido: product.num_pedido,
+        cod_prod: product.cod_prod,
+        item: product.item,
+      };
+      checkedProducts.push(item);
+    });
+
+    try {
+      const response = await api.put("/savecheckoutproducts", {
+        pedidos: checkedProducts,
+        user: user,
+        local: location,
+      });
+      // Pegue o status da resposta
+      const status = response.status;
+
+      return status;
+    } catch (error) {
+      if (error.response) {
+        // Erro de resposta do servidor
+        console.log("Erro:", error.response.status);
+        console.log(error.response.data); // Mensagem da resposta
+        return undefined;
+      } else {
+        // Erro de configuração da solicitação ou outro erro
+        console.log("Erro:", error.message);
+        return undefined;
+      }
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -327,6 +419,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         getProductOrder,
         saveSeparateProducts,
         printTag,
+        getOrdersToCheckOut,
+        getProductsToCheckOut,
+        saveCheckOutProducts,
       }}
     >
       {children}

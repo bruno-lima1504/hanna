@@ -4,8 +4,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Separacao from "../pages/separacao";
 import Separar from "../pages/separar";
 
-import { NativeStackNavigatorProps } from "react-native-screens/lib/typescript/native-stack/types";
-
 export type RootStackParamList = {
   Separacao: {
     toastType?: string | undefined;
