@@ -5,10 +5,11 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import Dashboard from "../pages/Dashboard";
 import Separacao from "../pages/separacao";
 import CustomDrawerContent from "../components/DrawerContent";
+import SeparacaoRoutes from "./separacao.routes";
 
 export type DrawerParamsList = {
   Dashboard: undefined;
-  Separacao: undefined;
+  Separação: undefined;
 };
 
 const Drawer = createDrawerNavigator<DrawerParamsList>();
@@ -26,8 +27,8 @@ function AppRoutes() {
         }}
       />
       <Drawer.Screen
-        name="Separacao"
-        component={Separacao}
+        name="Separação"
+        component={SeparacaoRoutes}
         options={{
           headerShown: false,
         }}

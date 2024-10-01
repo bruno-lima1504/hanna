@@ -3,20 +3,31 @@ import { FlatList, SafeAreaView, Text, StyleSheet, View } from "react-native";
 import {
   useNavigation,
   useRoute,
+  RouteProp,
   useFocusEffect,
 } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 
-import { AuthContext, OrderProps } from "../../contexts/AuthContext"; // Certifique-se de importar OrderProps
+import { AuthContext, OrderProps } from "../../contexts/AuthContext";
 import OrderList from "../../components/OrderList";
 import { colors } from "../../../constants/colors";
+
+import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
+import { RootStackParamList } from "../../routes/separacao.routes";
+
+type SeparacaoScreenRouteProp = RouteProp<RootStackParamList, "Separacao">;
+
+type SeparacaScreenStackProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Separacao"
+>;
 
 export default function Separacao() {
   const [orders, setOrders] = useState<OrderProps[]>([]);
   const { getOrders, cleanRespOrder } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
-  const route = useRoute();
+  const navigation = useNavigation<SeparacaScreenStackProp>();
+  const route = useRoute<SeparacaoScreenRouteProp>();
 
   // Função para exibir os toasts
   const showToast = (type: string, text1: string, text2: string) => {
@@ -54,22 +65,21 @@ export default function Separacao() {
   );
 
   // Exibir o toast ao receber parâmetros da rota
-  //   useEffect(() => {
-  //     if (route.params?.toastType) {
-  //       showToast(
-  //         route.params.toastType,
-  //         route.params.toastText1,
-  //         route.params.toastText2
-  //       );
-
-  //       // Limpar os parâmetros da rota após exibir o toast
-  //       navigation.setParams({
-  //         toastType: undefined,
-  //         toastText1: undefined,
-  //         toastText2: undefined,
-  //       });
-  //     }
-  //   }, [route.params, navigation]);
+  // Exibir o toast ao receber parâmetros da rota
+  useEffect(() => {
+    if (route.params?.toastType) {
+      showToast(
+        route.params.toastType,
+        route.params.toastText1 || "",
+        route.params.toastText2 || ""
+      );
+      navigation.setParams({
+        toastType: undefined,
+        toastText1: undefined,
+        toastText2: undefined,
+      });
+    }
+  }, [route.params, navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
