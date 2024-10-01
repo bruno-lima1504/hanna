@@ -33,6 +33,8 @@ type AuthContextData = {
     products: ProductProps[], // Array de produtos
     location: string
   ) => Promise<number | undefined>;
+  updateOrderList: () => Promise<undefined>;
+  getDataDashBoard: () => Promise<DashboardProp>;
 };
 
 type UserProps = {
@@ -124,6 +126,13 @@ type PrintTagSuccessResponse = {
 
 type ApiErrorResponse = {
   message: string;
+};
+
+type DashboardProp = {
+  separacao: { qtd_pedidos: string }[];
+  conferencia: { qtd_pedidos: string }[];
+  troca: { qtd_pedidos: string }[];
+  controle: { qtd_pedidos: string }[];
 };
 
 type PrintTagResponse = PrintTagSuccessResponse | ApiErrorResponse | undefined;
@@ -404,6 +413,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function updateOrderList(): Promise<undefined> {
+    try {
+      await api.get("/updateorderlist");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function getDataDashBoard() {
+    try {
+      const response = await api.get("/dashboard");
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -422,6 +448,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         getOrdersToCheckOut,
         getProductsToCheckOut,
         saveCheckOutProducts,
+        updateOrderList,
+        getDataDashBoard,
       }}
     >
       {children}

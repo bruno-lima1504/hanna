@@ -11,6 +11,9 @@ export type DrawerParamsList = {
   Dashboard: undefined;
   Separação: undefined;
   Conferência: undefined;
+  Troca: undefined;
+  Qualidade: undefined;
+  Reprovados: undefined;
 };
 
 const Drawer = createDrawerNavigator<DrawerParamsList>();

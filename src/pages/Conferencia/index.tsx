@@ -22,7 +22,7 @@ export default function Conferencia() {
   const navigation = useNavigation<ConferenciaScreenStackProp>();
   const route = useRoute<ConferenciaScreenRouteProp>();
 
-  const showToast = (type, txt1, txt2) => {
+  const showToast = (type: string, txt1: string, txt2: string) => {
     Toast.show({
       type: type,
       text1: txt1,
