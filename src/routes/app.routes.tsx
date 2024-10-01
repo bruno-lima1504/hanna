@@ -3,13 +3,14 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import Dashboard from "../pages/Dashboard";
-import Separacao from "../pages/separacao";
 import CustomDrawerContent from "../components/DrawerContent";
 import SeparacaoRoutes from "./separacao.routes";
+import ConferenciaRoute from "./conferencia.routes";
 
 export type DrawerParamsList = {
   Dashboard: undefined;
   Separação: undefined;
+  Conferência: undefined;
 };
 
 const Drawer = createDrawerNavigator<DrawerParamsList>();
@@ -29,6 +30,13 @@ function AppRoutes() {
       <Drawer.Screen
         name="Separação"
         component={SeparacaoRoutes}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Drawer.Screen
+        name="Conferência"
+        component={ConferenciaRoute}
         options={{
           headerShown: false,
         }}

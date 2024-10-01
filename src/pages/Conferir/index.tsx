@@ -1,49 +1,56 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import {
   View,
+  Text,
   TextInput,
   SafeAreaView,
   StyleSheet,
+  Button,
+  Platform,
   ActivityIndicator,
   Modal,
-  Text,
-  Platform,
 } from "react-native";
-import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
-import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
-import Toast from "react-native-toast-message";
-import { AuthContext } from "../../contexts/AuthContext";
-import ProductList from "../../components/ProductList";
-import { ModalPrinter } from "../../components/ModalPrinter";
-import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
-import { RootStackParamList } from "../../routes/separacao.routes";
-
 import { colors } from "../../../constants/colors";
 
-type SepararScreenRouteProp = RouteProp<RootStackParamList, "Separar">;
+import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 
-type SeparararScreenProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "Separar"
+import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
+
+import { AuthContext } from "../../contexts/AuthContext";
+
+import ProductList from "../../components/ProductList";
+import { ModalCheckout } from "../../components/ModalCheckout";
+
+import { RootParamConfList } from "../../routes/conferencia.routes";
+
+type ConferirScreenRouteProp = RouteProp<RootParamConfList, "Conferir">;
+
+type ConferirScreeStackProp = NativeStackNavigationProp<
+  RootParamConfList,
+  "Conferir"
 >;
 
-export default function Separar() {
+export default function Conferir() {
   const [cardInfo, setCardInfo] = useState([]);
   const [products, setProducts] = useState([]);
   const [leitura, setLeitura] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [showPrintButton, setShowPrintButton] = useState(false);
+  const [awaitItems, setAwaitItems] = useState(false);
+  const [showLocationButton, setShowLocationButton] = useState(false);
   const [showFinishButton, setShowFinishButton] = useState(false);
-  const [idPedido, setIdPedido] = useState("");
-  const [numPedido, setNumPedido] = useState("");
-  const [modalPrintVisible, setModalPrintVisible] = useState(false);
+  const [numPedido, setNumPedido] = useState(false);
   const [isProductLoaded, setIsProductLoaded] = useState(false);
+  const [modalLocationVisible, setModalLocationVisible] = useState(false);
+  const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const inputRef = useRef<TextInput>(null); // Ref tipado corretamente
-  const { getProductOrder, saveSeparateProducts } = useContext(AuthContext);
+  const route = useRoute<ConferirScreenRouteProp>();
+  const inputRef = useRef(null);
+  const { getProductsToCheckOut, saveCheckOutProducts } =
+    useContext(AuthContext);
 
-  const navigation = useNavigation<SeparararScreenProp>();
-  const route = useRoute<SepararScreenRouteProp>();
+  const navigation = useNavigation<ConferirScreeStackProp>();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -58,10 +65,14 @@ export default function Separar() {
   useEffect(() => {
     async function getOrderProducts() {
       try {
-        let responseOrders = await getProductOrder(route.params.pedido);
-        setCardInfo(responseOrders.itens_card || []);
-        setProducts(responseOrders.itens_pedido || []);
-        setIsProductLoaded(true);
+        const responseOrders = await getProductsToCheckOut(route.params.pedido);
+
+        if (responseOrders) {
+          setCardInfo(responseOrders.itens_card || []);
+          setProducts(responseOrders.itens_pedido || []);
+          setAwaitItems(responseOrders.awaitItems || false);
+          setIsProductLoaded(true);
+        }
       } catch (error) {
         console.error("Error fetching product order:", error);
       }
@@ -71,7 +82,6 @@ export default function Separar() {
 
   useEffect(() => {
     if (products.length > 0) {
-      setIdPedido(products[0].id_pedidos);
       setNumPedido(products[0].num_pedido);
     }
   }, [products]);
@@ -84,95 +94,73 @@ export default function Separar() {
 
   useEffect(() => {
     if (isProductLoaded) {
-      const completScan = products.find(
-        (product) => !product.num_serie && !product.lote
-      );
+      const completScan = products.find((product) => !product.conferido);
       if (!completScan) {
         console.log("Todos os produtos escaneados.");
-        showPrintCotainer(true);
+        showContainerButton(true);
       }
     }
   }, [products, isProductLoaded]);
 
-  function showPrintCotainer(data: boolean) {
-    setShowPrintButton(data);
+  function showContainerButton(data) {
+    setShowLocationButton(data);
   }
 
-  function handleSaveSeparete() {
-    showPrintCotainer(false);
+  function finishSeparete() {
     setShowFinishButton(true);
   }
 
-  async function handleFinishSeparate(): Promise<void> {
+  async function handleFinishSeparate() {
     setIsLoading(true); // Iniciar carregamento
     try {
-      const status = await saveSeparateProducts(products);
-      typeof status;
+      const status = await saveCheckOutProducts(products, location);
       setIsLoading(false);
       if (status !== 201) {
-        throw new Error("Erro ao separar pedido!");
+        throw new Error("Falha ao gravar conferência");
       }
-      // Navegar de volta para a tela 'Separacao' com parâmetros de toast
-      navigation.navigate("Separacao", {
+      navigation.navigate("Conferencia", {
         toastType: "success",
-        toastText1: "Pedido separado!",
-        toastText2: "Separação finalizada com sucesso",
+        toastText1: "Pedido conferido!",
+        toastText2: "Conferencia finalizada, emitindo NF!",
       });
     } catch (error) {
-      // Se houve erro, exibir o toast de erro
-      navigation.navigate("Separacao", {
+      setIsLoading(false);
+      navigation.navigate("Conferencia", {
         toastType: "error",
         toastText1: "Erro",
-        toastText2: "Ocorreu um erro ao finalizar a separação",
+        toastText2: "Ocorreu um erro ao finalizar a conferência",
       });
     }
   }
 
-  const handleInputChange = (text: string) => {
-    if (text) {
-      const qrValue = text.split(/[;�:]/);
-      setLeitura(qrValue);
-      setInputValue(""); // Limpa o input após a leitura
-    }
+  const handleInputChange = (text) => {
+    let qrValue = text.split(/[;�:]/);
+    setInputValue("");
+    setLeitura(qrValue);
   };
 
   function verifyItem() {
     let item;
     const verifiyCode = products.find(
       (product) =>
-        product.cod_prod === leitura[0] && product.num_serie === leitura[1]
+        product.cod_prod === leitura[0] &&
+        (product.num_serie === leitura[1] || product.lote === leitura[1])
     );
-    if (!verifiyCode) {
+
+    if (verifiyCode) {
       item = products.find(
         (product) =>
-          product.cod_prod === leitura[0] && !product.num_serie && !product.lote
+          product.cod_prod === leitura[0] &&
+          (product.num_serie === leitura[1] || product.lote === leitura[1]) &&
+          !product.conferido
       );
     } else {
-      showToast("error", "Leitura Invalida", "Leitura já realizada!");
+      showToast("error", "Leitura Invalida", "Item não pertence ao pedido!");
       return;
     }
-
     if (item) {
-      let infosQrcode = item.seqcb.split(";");
-      let campoMap = {
-        C: "cod_prod",
-        L: "lote",
-        S: "num_serie",
-        O: "origem",
-        V: "validade",
-        D: "prod_desc",
-      };
-
-      // Atualizando os campos do objeto item com base na leitura e no infosQrcode
-      for (let i = 0; i < infosQrcode.length; i++) {
-        let letra = infosQrcode[i];
-        if (campoMap[letra]) {
-          item[campoMap[letra]] = leitura[i];
-        }
-      }
-
-      setProducts([...products]); // Forçar re-renderização
-
+      item.conferido = "1";
+      setProducts([...products]);
       setCardInfo((prevCardInfo) =>
         prevCardInfo.map((card) =>
           card.cod_prod === item.cod_prod
@@ -184,25 +172,26 @@ export default function Separar() {
         )
       );
     } else {
-      showToast(
-        "error",
-        "Leitura Invalida",
-        "Item não pertence a esse pedido!"
-      );
+      showToast("error", "Leitura Invalida", "Esse item ja foi conferido!");
       return;
     }
   }
-
-  function handlePrinter() {
-    setModalPrintVisible(true);
-  }
-
-  const showToast = (type: string, text1: string, text2: string) => {
+  const showToast = (type, txt1, txt2) => {
     Toast.show({
       type: type,
-      text1: text1,
-      text2: text2,
+      text1: txt1,
+      text2: txt2,
     });
+  };
+
+  function handleLocation() {
+    setModalLocationVisible(true);
+  }
+
+  const handleSaveLocation = (location) => {
+    setLocation(location);
+    showContainerButton(false);
+    finishSeparete();
   };
 
   return (
@@ -217,21 +206,21 @@ export default function Separar() {
         }}
         autoFocus={true}
         keyboardType="default"
-        showSoftInputOnFocus={Platform.OS === "android" ? false : undefined}
+        showSoftInputOnFocus={Platform.OS === "android" ? false : undefined} // Desabilitar o teclado no Android
       />
       <FlatList
         data={cardInfo}
         renderItem={({ item }) => <ProductList data={item} />}
         keyExtractor={(item) => item.cod_prod}
-        style={styles.flatList}
       />
-      {showPrintButton && (
+
+      {showLocationButton && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            onPress={handlePrinter}
-            style={[styles.greenButton, styles.marginSpacing]} // Aplicar estilos
+            onPress={handleLocation}
+            style={[styles.greenButton, styles.marginSpacing]}
           >
-            <Text style={styles.textButton}>Imprimir Etiqueta</Text>
+            <Text style={styles.textButton}>Localização</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -242,7 +231,7 @@ export default function Separar() {
           ) : (
             <TouchableOpacity
               onPress={handleFinishSeparate}
-              style={[styles.greenButton, styles.marginSpacing]} // Aplicar estilos
+              style={[styles.greenButton, styles.marginSpacing]}
             >
               <Text style={styles.textButton}>Finalizar</Text>
             </TouchableOpacity>
@@ -251,14 +240,14 @@ export default function Separar() {
       )}
       <Modal
         transparent={true}
-        visible={modalPrintVisible}
+        visible={modalLocationVisible}
         animationType="fade"
       >
-        <ModalPrinter
-          handleCloseModal={() => setModalPrintVisible(false)}
-          onPrint={handleSaveSeparete}
-          numPed={numPedido}
-          idPedido={idPedido}
+        <ModalCheckout
+          handleCloseModal={() => {
+            setModalLocationVisible(false);
+          }}
+          onSaveLocation={handleSaveLocation} // Passa a função de callback para o modal
         />
       </Modal>
     </SafeAreaView>
@@ -272,9 +261,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.light.background,
   },
-  input: {
-    height: 10,
-    opacity: 0,
+  buttonContainer: {
+    marginTop: 20,
+  },
+  closeButton: {
+    padding: 10,
+    backgroundColor: "red", // Cor do botão
+    borderRadius: 5,
   },
   greenButton: {
     backgroundColor: "green",
@@ -294,10 +287,20 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
-  buttonContainer: {
-    marginTop: 20,
+  hiddenInput: {
+    position: "absolute",
+    top: -1000, // Mantém o input fora da tela
+    height: 0, // Sem altura visível
+    width: 0, // Sem largura visível
+    opacity: 0, // Totalmente transparente
   },
-  flatList: {
-    marginBottom: 12,
+  input: {
+    height: 10,
+    opacity: 0,
+  },
+  awaitItemsText: {
+    color: "red",
+    fontWeight: "bold",
+    fontSize: 15,
   },
 });
