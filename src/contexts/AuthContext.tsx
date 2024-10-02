@@ -188,7 +188,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const { userId, user, ambiente, name, email, sellerId, userIdGroup } =
         response.data;
-
       if (!response.data) {
         setCredentialsMsg(true);
         setLoadingAuth(false);
@@ -216,6 +215,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       setLoadingAuth(false);
     } catch (err) {
+      setCredentialsMsg(true);
       console.log("erro ao acessar -> " + err);
       setLoadingAuth(false);
     }
