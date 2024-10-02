@@ -27,19 +27,26 @@ export default function Dashboard() {
             let data = await getDataDashBoard();
             if (data.separacao.length != 0) {
               setSeparacao(Number(data.separacao[0].qtd_pedidos));
+            } else {
+              setSeparacao(0);
             }
             if (data.conferencia.length != 0) {
               setConferencia(Number(data.conferencia[0].qtd_pedidos));
+            } else {
+              setConferencia(0);
             }
             if (data.controle.length != 0) {
               setControle(Number(data.controle[0].qtd_pedidos));
+            } else {
+              setControle(0);
             }
             if (data.troca.length != 0) {
               setTroca(Number(data.troca[0].qtd_pedidos));
+            } else {
+              setTroca(0);
             }
           } catch (error) {
             console.error("Error fetching clean", error);
-          } finally {
           }
         }
       }

@@ -35,6 +35,13 @@ type AuthContextData = {
   ) => Promise<number | undefined>;
   updateOrderList: () => Promise<undefined>;
   getDataDashBoard: () => Promise<DashboardProp>;
+  receiveOrdersQualityControle: () => Promise<OrderProps[] | undefined>;
+  receiveProdutcsToCheckoutQualityControl: (
+    pedido: string
+  ) => Promise<ProductOrderResponse | undefined>;
+  saveStatusReceivedCQ: (
+    products: ProductProps[]
+  ) => Promise<number | undefined>;
 };
 
 type UserProps = {
@@ -282,7 +289,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     products: ProductProps[]
   ): Promise<number | undefined> {
     try {
-      const userInfo = await AsyncStorage.getItem("@hannaStorage");
+      const userInfo = await AsyncStorage.getItem("@hanna");
       let user = JSON.parse(userInfo || "{}");
       let dados = {
         products: products,
@@ -430,6 +437,60 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function receiveOrdersQualityControle(): Promise<
+    OrderProps[] | undefined
+  > {
+    try {
+      const response = await api.get("/receivequalitycontrol");
+
+      if (response.status === 200) {
+        return response.data as OrderProps[];
+      } else {
+        return undefined;
+      }
+    } catch (error) {
+      console.log(error);
+      return undefined;
+    }
+  }
+
+  async function receiveProdutcsToCheckoutQualityControl(
+    pedido: string
+  ): Promise<ProductOrderResponse | undefined> {
+    try {
+      const response = await api.post("/checkoutqualitycontrol", {
+        pedido: pedido,
+      });
+      if (response.data !== 200) {
+        return response.data as ProductOrderResponse;
+      } else {
+        throw new Error(`Erro ao trazer produtos: ${response.status}`);
+      }
+    } catch (error: any) {
+      console.error("Erro ao buscar produtos para conferência:", error.message);
+      return undefined;
+    }
+  }
+
+  async function saveStatusReceivedCQ(
+    products: ProductProps[]
+  ): Promise<number | undefined> {
+    const userInfo = await AsyncStorage.getItem("@hannaStorage");
+    let user = JSON.parse(userInfo || "{}");
+    let data = {
+      products,
+      user,
+    };
+    console.log(data);
+    try {
+      const response = await api.put("/savestatusreceivedcq", data);
+      return response.status;
+    } catch (err) {
+      console.log(err);
+      return undefined;
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -450,6 +511,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         saveCheckOutProducts,
         updateOrderList,
         getDataDashBoard,
+        receiveOrdersQualityControle,
+        receiveProdutcsToCheckoutQualityControl,
+        saveStatusReceivedCQ,
       }}
     >
       {children}

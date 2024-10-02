@@ -6,12 +6,14 @@ import Dashboard from "../pages/Dashboard";
 import CustomDrawerContent from "../components/DrawerContent";
 import SeparacaoRoutes from "./separacao.routes";
 import ConferenciaRoute from "./conferencia.routes";
+import ControleQualidadeRoute from "./controle.routes";
 
 export type DrawerParamsList = {
   Dashboard: undefined;
   Separação: undefined;
   Conferência: undefined;
   Troca: undefined;
+  "Entrada qualidade": undefined;
   Qualidade: undefined;
   Reprovados: undefined;
 };
@@ -33,6 +35,13 @@ function AppRoutes() {
       <Drawer.Screen
         name="Separação"
         component={SeparacaoRoutes}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Drawer.Screen
+        name="Entrada qualidade"
+        component={ControleQualidadeRoute}
         options={{
           headerShown: false,
         }}

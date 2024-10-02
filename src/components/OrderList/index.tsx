@@ -30,6 +30,7 @@ export default function OrderList({ data }: OrderListProps) {
   // Função para separar os pedidos com base no status
   function separeteOrders(order: string) {
     // Mapear os status para as rotas
+
     const status: Record<string, keyof RootStackParamProducts> = {
       BQ: "Separar",
       RP: "Trocar",
@@ -38,7 +39,7 @@ export default function OrderList({ data }: OrderListProps) {
     };
 
     const routeName = status[data.status_separacao];
-
+    console.log(routeName);
     if (routeName) {
       // Navegar para a rota correspondente, passando o pedido como parâmetro
       navigation.navigate(routeName, {
@@ -72,7 +73,7 @@ export default function OrderList({ data }: OrderListProps) {
       <Text style={styles.bodyText}>Quantidade: {data.quantidade_itens}</Text>
       {data.controle_qualidade === "1" && data.libera_cont_qual !== "0" && (
         <Text style={styles.alertText}>
-          Existem Produtos aguardando liberação
+          Enviar Pedido para o Controle de Qualidade
         </Text>
       )}
     </TouchableOpacity>
@@ -81,7 +82,7 @@ export default function OrderList({ data }: OrderListProps) {
 
 const styles = StyleSheet.create({
   orderCard: {
-    height: 150,
+    height: 180,
     width: 300,
     elevation: 3,
     justifyContent: "center",
@@ -104,5 +105,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginHorizontal: 10,
     paddingHorizontal: 5,
+    fontSize: 15,
   },
 });
