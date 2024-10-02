@@ -1,12 +1,16 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { FlatList, SafeAreaView, Text, StyleSheet } from "react-native";
+
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import Toast from "react-native-toast-message";
-import { colors } from "../../../constants/colors";
-import { AuthContext } from "../../contexts/AuthContext";
-import OrderList from "../../components/OrderList";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 import { RootParamConfList } from "../../routes/conferencia.routes";
+
+import { AuthContext } from "../../contexts/AuthContext";
+
+import OrderList from "../../components/OrderList";
+
+import Toast from "react-native-toast-message";
+import { colors } from "../../../constants/colors";
 
 type ConferenciaScreenRouteProp = RouteProp<RootParamConfList, "Conferencia">;
 
@@ -60,7 +64,7 @@ export default function Conferencia() {
     <SafeAreaView style={styles.safeArea}>
       {orders.length === 0 ? (
         <Text style={styles.noOrdersText}>
-          Não existem pedidos para separar.
+          Não existem pedidos para conferir.
         </Text>
       ) : (
         <FlatList
@@ -82,15 +86,11 @@ const styles = StyleSheet.create({
   },
   noOrdersText: {
     fontSize: 18,
-    backgroundColor: "#D3D3D3", // Cor de fundo equivalente a "bg-slate-200"
+    backgroundColor: colors.light.backgroudEmptyMsg,
     borderRadius: 50,
     padding: 10,
     textAlign: "center",
     width: 300,
     marginTop: 20,
-  },
-  emptyText: {
-    marginTop: 5,
-    backgroundColor: "blue",
   },
 });

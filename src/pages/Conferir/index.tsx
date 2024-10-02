@@ -5,25 +5,22 @@ import {
   TextInput,
   SafeAreaView,
   StyleSheet,
-  Button,
   Platform,
   ActivityIndicator,
   Modal,
 } from "react-native";
-import { colors } from "../../../constants/colors";
 
 import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
-
-import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
-import Toast from "react-native-toast-message";
-
 import { AuthContext } from "../../contexts/AuthContext";
 
 import ProductList from "../../components/ProductList";
 import { ModalCheckout } from "../../components/ModalCheckout";
-
 import { RootParamConfList } from "../../routes/conferencia.routes";
+
+import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
+import { colors } from "../../../constants/colors";
 
 type ConferirScreenRouteProp = RouteProp<RootParamConfList, "Conferir">;
 

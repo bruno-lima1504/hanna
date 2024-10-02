@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { RootStackParamProducts } from "../../routes/separacao.routes";
-// Definindo o tipo de dados que o 'data' contém
+
 type OrderProps = {
   id_pedidos: string;
   num_pedido: string;
@@ -15,22 +15,16 @@ type OrderProps = {
   libera_cont_qual: string;
 };
 
-// Tipagem para o componente
 type OrderListProps = {
   data: OrderProps;
 };
 
-// Definir o tipo para a navegação com parâmetros
 type SeparacaoScreenNavigationProp = NavigationProp<RootStackParamProducts>;
 
 export default function OrderList({ data }: OrderListProps) {
-  // Tipagem da navegação
   const navigation = useNavigation<SeparacaoScreenNavigationProp>();
 
-  // Função para separar os pedidos com base no status
   function separeteOrders(order: string) {
-    // Mapear os status para as rotas
-
     const status: Record<string, keyof RootStackParamProducts> = {
       BQ: "Separar",
       RP: "Trocar",
@@ -41,14 +35,12 @@ export default function OrderList({ data }: OrderListProps) {
     const routeName = status[data.status_separacao];
     console.log(routeName);
     if (routeName) {
-      // Navegar para a rota correspondente, passando o pedido como parâmetro
       navigation.navigate(routeName, {
-        pedido: order, // Aqui o parâmetro 'pedido' é enviado para a rota
+        pedido: order,
       });
     }
   }
 
-  // Função para formatar a data
   function formatarData(data: string) {
     const ano = data.substring(0, 4);
     const mes = data.substring(4, 6);

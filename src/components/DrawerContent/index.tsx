@@ -8,7 +8,6 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { AuthContext } from "../../contexts/AuthContext";
 
-// Pegue a altura da tela
 const { height } = Dimensions.get("window");
 
 export default function CustomDrawerContent(props: any) {
@@ -37,7 +36,7 @@ export default function CustomDrawerContent(props: any) {
 
 const styles = StyleSheet.create({
   containerLogo: {
-    height: height * 0.2, // 20% da altura da tela
+    height: height * 0.2,
     justifyContent: "center",
     alignItems: "center",
     padding: 4,

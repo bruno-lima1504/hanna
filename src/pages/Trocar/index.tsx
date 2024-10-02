@@ -1,14 +1,12 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import {
   View,
-  Text,
   TextInput,
   SafeAreaView,
-  StyleSheet,
-  Button,
   Platform,
   ActivityIndicator,
-  Modal,
+  Text,
+  StyleSheet,
 } from "react-native";
 
 import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
@@ -17,24 +15,21 @@ import Toast from "react-native-toast-message";
 
 import { AuthContext } from "../../contexts/AuthContext";
 
-import ProductList from "../../components/ProductList";
+import ReprovedProductList from "../../components/ReprovedProductList";
 
 import { colors } from "../../../constants/colors";
+
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
-import { RootStackControleParamList } from "../../routes/controle.routes";
+import { RootReprovadosStackParamList } from "../../routes/reprovados.routes";
 
-type RecebeCQScreenRouteProp = RouteProp<
-  RootStackControleParamList,
-  "ConferirCQ"
+type TrocarScreenRouteProp = RouteProp<RootReprovadosStackParamList, "Trocar">;
+
+type TrocarScreenStackProp = NativeStackNavigationProp<
+  RootReprovadosStackParamList,
+  "Trocar"
 >;
 
-type RecebeCQScreenStackProp = NativeStackNavigationProp<
-  RootStackControleParamList,
-  "ConferirCQ"
->;
-
-export default function ConferirCQ() {
-  const [cardInfo, setCardInfo] = useState([]);
+export default function Trocar() {
   const [products, setProducts] = useState([]);
   const [leitura, setLeitura] = useState([]);
   const [inputValue, setInputValue] = useState("");
@@ -42,12 +37,12 @@ export default function ConferirCQ() {
   const [numPedido, setNumPedido] = useState(false);
   const [isProductLoaded, setIsProductLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const route = useRoute<RecebeCQScreenRouteProp>();
+  const route = useRoute<TrocarScreenRouteProp>();
   const inputRef = useRef(null);
-  const { receiveProdutcsToCheckoutQualityControl, saveStatusReceivedCQ } =
+  const { getProductsForExchange, saveExchangeProducts } =
     useContext(AuthContext);
 
-  const navigation = useNavigation<RecebeCQScreenStackProp>();
+  const navigation = useNavigation<TrocarScreenStackProp>();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -62,19 +57,17 @@ export default function ConferirCQ() {
   useEffect(() => {
     async function getOrderProducts() {
       try {
-        let responseOrders = await receiveProdutcsToCheckoutQualityControl(
-          route.params.pedido
-        );
+        let responseOrders = await getProductsForExchange(route.params.pedido);
+
         const updatedProducts = responseOrders.itens_pedido.map((product) => {
           return {
             ...product,
-            recebido: false,
+            lote: "",
+            num_serie: "",
+            troca: product.status_produto_atual !== "RP" ? "1" : false,
           };
         });
-
-        setCardInfo(responseOrders.itens_card || []);
-        setProducts(updatedProducts || []);
-
+        setProducts(updatedProducts);
         setIsProductLoaded(true);
       } catch (error) {
         console.error("Error fetching product order:", error);
@@ -97,37 +90,37 @@ export default function ConferirCQ() {
 
   useEffect(() => {
     if (isProductLoaded) {
-      const completScan = products.find((product) => !product.recebido);
+      const completScan = products.find((product) => !product.troca);
       if (!completScan) {
         console.log("Todos os produtos escaneados.");
-        finishSeparete(true);
+        finishSeparete();
       }
     }
   }, [products, isProductLoaded]);
 
-  function finishSeparete(data) {
-    setShowFinishButton(data);
+  function finishSeparete() {
+    setShowFinishButton(true);
   }
 
-  async function handleFinishSeparate(): Promise<void> {
+  async function handleFinishSeparate() {
     setIsLoading(true); // Iniciar carregamento
     try {
-      const status = await saveStatusReceivedCQ(products);
+      const status = await saveExchangeProducts(products);
       setIsLoading(false);
-      if (status !== 201) {
-        throw new Error("Falha ao gravar conferência");
+      if (status !== 200) {
+        throw new Error("Status diferente de 200");
       }
-      navigation.navigate("Entrada CQ", {
+      navigation.navigate("ReprovadosStack", {
         toastType: "success",
-        toastText1: "Pedido recebido!",
-        toastText2: "Produtos recebidos no controle de qualidade!",
+        toastText1: "Troca realizada!",
+        toastText2: "Controle de qualidade aguardando novo produto!",
       });
     } catch (error) {
       setIsLoading(false);
-      navigation.navigate("Entrada CQ", {
+      navigation.navigate("ReprovadosStack", {
         toastType: "error",
         toastText1: "Erro",
-        toastText2: "Ocorreu um erro ao receber o pedido",
+        toastText2: "Ocorreu um erro durante a troca",
       });
     }
   }
@@ -141,41 +134,47 @@ export default function ConferirCQ() {
   function verifyItem() {
     let item;
     const verifiyCode = products.find(
-      (product) =>
-        product.cod_prod === leitura[0] &&
-        (product.num_serie === leitura[1] || product.lote === leitura[1])
+      (product) => product.cod_prod === leitura[0]
     );
 
     if (verifiyCode) {
       item = products.find(
-        (product) =>
-          product.cod_prod === leitura[0] &&
-          (product.num_serie === leitura[1] || product.lote === leitura[1]) &&
-          !product.conferido
+        (product) => product.cod_prod === leitura[0] && !product.troca
       );
     } else {
       showToast("error", "Leitura Invalida", "Item não pertence ao pedido!");
       return;
     }
+
     if (item) {
-      item.recebido = "1";
+      let infosQrcode = item.seqcb.split(";");
+      let campoMap = {
+        C: "cod_prod",
+        L: "lote",
+        S: "num_serie",
+        O: "origem",
+        V: "validade",
+        D: "prod_desc",
+      };
+
+      // Atualizando os campos do objeto item com base na leitura e no infosQrcode
+      for (let i = 0; i < infosQrcode.length; i++) {
+        let letra = infosQrcode[i];
+        if (campoMap[letra]) {
+          item[campoMap[letra]] = leitura[i];
+        }
+      }
+      item.troca = "1";
+      item.status_produto_atual = "CQ";
+
       setProducts([...products]);
-      setCardInfo((prevCardInfo) =>
-        prevCardInfo.map((card) =>
-          card.cod_prod === item.cod_prod
-            ? {
-                ...card,
-                qtd_leituras: (parseInt(card.qtd_leituras) + 1).toString(),
-              }
-            : card
-        )
-      );
+      console.log(products);
     } else {
       showToast("error", "Leitura Invalida", "Esse item ja foi conferido!");
       return;
     }
   }
-  const showToast = (type, txt1, txt2) => {
+  const showToast = (type: string, txt1: string, txt2: string) => {
     Toast.show({
       type: type,
       text1: txt1,
@@ -195,21 +194,24 @@ export default function ConferirCQ() {
         }}
         autoFocus={true}
         keyboardType="default"
-        showSoftInputOnFocus={Platform.OS === "android" ? false : undefined}
+        showSoftInputOnFocus={Platform.OS === "android" ? false : undefined} // Desabilitar o teclado no Android
       />
       <FlatList
-        data={cardInfo}
-        renderItem={({ item }) => <ProductList data={item} />}
-        keyExtractor={(item) => item.cod_prod}
+        data={products}
+        renderItem={({ item }) => {
+          return <ReprovedProductList data={item} />;
+        }}
+        keyExtractor={(item) => item.id_produtos_pedido}
       />
+
       {showFinishButton && (
         <View style={styles.buttonContainer}>
           {isLoading ? (
             <ActivityIndicator size="large" color="#0000ff" />
           ) : (
             <TouchableOpacity
-              onPress={handleFinishSeparate}
               style={[styles.greenButton, styles.marginSpacing]}
+              onPress={handleFinishSeparate}
             >
               <Text style={styles.textButton}>Finalizar</Text>
             </TouchableOpacity>
@@ -251,5 +253,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 20,
+  },
+  flatList: {
+    marginBottom: 12,
   },
 });
