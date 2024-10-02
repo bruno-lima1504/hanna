@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import { View, Text, SafeAreaView, StyleSheet } from "react-native";
+
 import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../contexts/AuthContext";
-import { colors } from "../../../constants/colors";
 
 import DashboardCard from "../../components/DashboardCard";
+
+import { colors } from "../../../constants/colors";
 
 export default function Dashboard() {
   const [separacao, setSeparacao] = useState(0);
@@ -89,7 +91,7 @@ export default function Dashboard() {
         textColor="white"
         iconColor="white"
         amount={troca}
-        icon="refresh-cw"
+        icon="x-octagon"
       />
     </SafeAreaView>
   );
@@ -102,32 +104,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.light.background,
   },
-  noOrdersText: {
-    fontSize: 18,
-    backgroundColor: "#D3D3D3", // Cor de fundo equivalente a "bg-slate-200"
-    borderRadius: 50,
-    padding: 10,
-    textAlign: "center",
-    width: 300,
-    marginTop: 20,
-  },
-  emptyText: {
-    marginTop: 5,
-    backgroundColor: "blue",
-  },
   header: {
-    height: 48, // 12 in Tailwind would be 48px
+    height: 48,
     width: "100%",
     justifyContent: "center",
     alignItems: "flex-end",
-    backgroundColor: colors.light.background, // Tailwind's bg-blue-500
-    marginBottom: 12, // Tailwind's mb-3
-    padding: 8, // Tailwind's p-2
-    borderRadius: 8, // Tailwind's rounded-md
+    backgroundColor: colors.light.background,
+    marginBottom: 12,
+    padding: 8,
+    borderRadius: 8,
   },
   welcomeText: {
-    color: "white", // Tailwind's text-white
-    fontSize: 16, // Tailwind's text-base (16px)
-    fontWeight: "bold", // Tailwind's font-bold
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
   },
 });

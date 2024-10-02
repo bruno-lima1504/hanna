@@ -9,16 +9,18 @@ import {
   Text,
   Platform,
 } from "react-native";
+
 import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
-import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
-import Toast from "react-native-toast-message";
-import { AuthContext } from "../../contexts/AuthContext";
-import ProductList from "../../components/ProductList";
-import { ModalPrinter } from "../../components/ModalPrinter";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 import { RootStackParamList } from "../../routes/separacao.routes";
+import { AuthContext } from "../../contexts/AuthContext";
+
+import { ModalPrinter } from "../../components/ModalPrinter";
+import ProductList from "../../components/ProductList";
 
 import { colors } from "../../../constants/colors";
+import Toast from "react-native-toast-message";
+import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
 
 type SepararScreenRouteProp = RouteProp<RootStackParamList, "Separar">;
 

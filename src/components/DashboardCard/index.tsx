@@ -8,7 +8,6 @@ type FeatherIconName = keyof typeof Feather.glyphMap;
 
 import { DrawerParamsList } from "../../routes/app.routes";
 
-// Tipar a navegação corretamente
 type NavigationProps = NavigationProp<DrawerParamsList>;
 
 export default function DashboardCard({
@@ -20,7 +19,7 @@ export default function DashboardCard({
   icon,
 }: {
   bgColor: string;
-  title: keyof DrawerParamsList; // Assegura que o title seja uma rota válida
+  title: keyof DrawerParamsList;
   textColor: string;
   iconColor: string;
   amount: number;
@@ -32,7 +31,7 @@ export default function DashboardCard({
     if (title === "Qualidade") {
       return;
     }
-    navigation.navigate(title); // Aqui a rota será validada pelo tipo
+    navigation.navigate(title);
   }
 
   return (

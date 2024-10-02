@@ -42,6 +42,17 @@ type AuthContextData = {
   saveStatusReceivedCQ: (
     products: ProductProps[]
   ) => Promise<number | undefined>;
+  getOrdersForExchange: () => Promise<OrderProps[] | undefined>;
+  getProductsForExchange: (
+    pedido: string
+  ) => Promise<ProductOrderResponse | undefined>;
+  saveExchangeProducts: (
+    products: ProductProps[]
+  ) => Promise<number | undefined>;
+  saveReceivedOrder: (
+    pedido: ReceiveCheckoutOrder
+  ) => Promise<number | undefined>;
+  receiveOrdersToCheckout: () => Promise<OrderProps[] | undefined>;
 };
 
 type UserProps = {
@@ -143,6 +154,11 @@ type DashboardProp = {
 };
 
 type PrintTagResponse = PrintTagSuccessResponse | ApiErrorResponse | undefined;
+
+type ReceiveCheckoutOrder = {
+  idPedido: string;
+  numPedido: string;
+};
 
 export const AuthContext = createContext({} as AuthContextData);
 
@@ -491,6 +507,98 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function getOrdersForExchange(): Promise<OrderProps[] | undefined> {
+    try {
+      const response = await api.get("/reprovados");
+      if (response.status === 200) {
+        return response.data as OrderProps[];
+      } else {
+        return undefined;
+      }
+    } catch (error) {
+      console.log(error);
+      return undefined;
+    }
+  }
+
+  async function getProductsForExchange(
+    pedido: string
+  ): Promise<ProductOrderResponse | undefined> {
+    try {
+      const response = await api.post("/trocar", {
+        pedido: pedido,
+      });
+      console.log(response.data);
+      return response.data as ProductOrderResponse;
+    } catch (error) {
+      console.log(error);
+      return undefined;
+    }
+  }
+
+  async function saveExchangeProducts(
+    products: ProductProps[]
+  ): Promise<number | undefined> {
+    try {
+      const userInfo = await AsyncStorage.getItem("@hannaStorage");
+      let user = JSON.parse(userInfo || "{}");
+
+      const requestBody = {
+        products,
+        user: user.userId.toString(),
+      };
+
+      console.log(requestBody);
+
+      const response = await api.put("/saveexchangeproducts", requestBody);
+
+      return response.status;
+    } catch (err) {
+      console.log(err);
+      return undefined;
+    }
+  }
+
+  async function saveReceivedOrder(
+    pedido: ReceiveCheckoutOrder
+  ): Promise<number | undefined> {
+    try {
+      const userInfo = await AsyncStorage.getItem("@hanna");
+      let user = JSON.parse(userInfo || "{}");
+      const data = {
+        pedido: pedido,
+        user: user,
+      };
+      console.log(data);
+      const response = await api.put("/savereceivedcheckout", {
+        data,
+      });
+      console.log(response.data);
+      if (response.status !== 201) {
+        throw new Error("pedido não recebido!");
+      }
+      return response.status as number;
+    } catch (err) {
+      console.log(err);
+      return undefined;
+    }
+  }
+
+  async function receiveOrdersToCheckout(): Promise<OrderProps[] | undefined> {
+    try {
+      const response = await api.get("/receivecheckout");
+
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        return undefined;
+      }
+    } catch (err) {
+      console.log(err);
+      return undefined;
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -514,6 +622,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         receiveOrdersQualityControle,
         receiveProdutcsToCheckoutQualityControl,
         saveStatusReceivedCQ,
+        getOrdersForExchange,
+        getProductsForExchange,
+        saveExchangeProducts,
+        saveReceivedOrder,
+        receiveOrdersToCheckout,
       }}
     >
       {children}

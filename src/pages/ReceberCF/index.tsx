@@ -6,36 +6,38 @@ import {
   TextInput,
   StyleSheet,
   Platform,
+  Modal,
 } from "react-native";
 
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import { RootStackControleParamList } from "../../routes/controle.routes";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
-
+import { DrawerParamsList } from "../../routes/app.routes";
 import { AuthContext } from "../../contexts/AuthContext";
 
 import OrderList from "../../components/OrderList";
+import { ModalReceive } from "../../components/ModalReceiveCheckout";
 
 import Toast from "react-native-toast-message";
 import { colors } from "../../../constants/colors";
 
-type RecebeCQScreenRouteProp = RouteProp<
-  RootStackControleParamList,
-  "Entrada CQ"
+type RecebeCFScreenRouteProp = RouteProp<
+  DrawerParamsList,
+  "Entrada Conferência"
 >;
-type RecebeCQScreenStackProp = NativeStackNavigationProp<
-  RootStackControleParamList,
-  "Entrada CQ"
+type RecebeCFScreenStackProp = NativeStackNavigationProp<
+  DrawerParamsList,
+  "Entrada Conferência"
 >;
 
-export default function RecebeCQ() {
+export default function RecebeCF() {
   const [orders, setOrders] = useState([]);
   const [leitura, setLeitura] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const { receiveOrdersQualityControle } = useContext(AuthContext);
+  const { receiveOrdersToCheckout } = useContext(AuthContext);
+  const [receiveModalVisible, setReceiveModalVisible] = useState(false);
   const inputRef = useRef(null);
-  const navigation = useNavigation<RecebeCQScreenStackProp>();
-  const route = useRoute<RecebeCQScreenRouteProp>();
+  const navigation = useNavigation<RecebeCFScreenStackProp>();
+  const route = useRoute<RecebeCFScreenRouteProp>();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -47,7 +49,7 @@ export default function RecebeCQ() {
     return () => clearInterval(interval);
   }, []);
 
-  const showToast = (type: string, txt1: string, txt2: string) => {
+  const showToast = (type, txt1, txt2) => {
     Toast.show({
       type: type,
       text1: txt1,
@@ -72,7 +74,7 @@ export default function RecebeCQ() {
     }
 
     async function getOrdersList() {
-      let responseOrders = await receiveOrdersQualityControle();
+      let responseOrders = await receiveOrdersToCheckout();
       setOrders(responseOrders || []);
     }
     getOrdersList();
@@ -91,10 +93,7 @@ export default function RecebeCQ() {
   }, [leitura]);
 
   const verifyItem = () => {
-    let nPedido = leitura[0];
-    navigation.navigate("ConferirCQ", {
-      pedido: nPedido,
-    });
+    setReceiveModalVisible(true);
   };
 
   useEffect(() => {
@@ -132,7 +131,7 @@ export default function RecebeCQ() {
             }}
             autoFocus={true}
             keyboardType="default"
-            showSoftInputOnFocus={Platform.OS === "android" ? false : undefined}
+            showSoftInputOnFocus={Platform.OS === "android" ? false : undefined} // Desabilitar o teclado no Android
           />
           <FlatList
             data={orders}
@@ -141,6 +140,19 @@ export default function RecebeCQ() {
           />
         </>
       )}
+      <Modal
+        transparent={true}
+        visible={receiveModalVisible}
+        animationType="fade"
+      >
+        <ModalReceive
+          handleCloseModal={() => {
+            setReceiveModalVisible(false);
+          }}
+          idPedido={leitura[0]}
+          numPedido={leitura[1]}
+        />
+      </Modal>
     </SafeAreaView>
   );
 }

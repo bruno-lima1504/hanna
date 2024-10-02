@@ -1,40 +1,42 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
-import { FlatList, SafeAreaView, Text, StyleSheet, View } from "react-native";
+import { FlatList, SafeAreaView, Text, StyleSheet } from "react-native";
+
 import {
   useNavigation,
   useRoute,
-  RouteProp,
   useFocusEffect,
+  RouteProp,
 } from "@react-navigation/native";
-
-import { AuthContext, OrderProps } from "../../contexts/AuthContext";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
-import { RootStackParamList } from "../../routes/separacao.routes";
+import { RootReprovadosStackParamList } from "../../routes/reprovados.routes";
+import { AuthContext } from "../../contexts/AuthContext";
 
 import OrderList from "../../components/OrderList";
 
-import { colors } from "../../../constants/colors";
 import Toast from "react-native-toast-message";
+import { colors } from "../../../constants/colors";
 
-type SeparacaoScreenRouteProp = RouteProp<RootStackParamList, "Separacao">;
-type SeparacaScreenStackProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "Separacao"
+type ReprovadosScreenRouteProp = RouteProp<
+  RootReprovadosStackParamList,
+  "ReprovadosStack"
+>;
+type ReprovadosScreenStackProp = NativeStackNavigationProp<
+  RootReprovadosStackParamList,
+  "ReprovadosStack"
 >;
 
-export default function Separacao() {
-  const [orders, setOrders] = useState<OrderProps[]>([]);
-  const { getOrders, cleanRespOrder } = useContext(AuthContext);
+export default function Reprovados() {
+  const [orders, setOrders] = useState([]);
+  const { getOrdersForExchange } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation<SeparacaScreenStackProp>();
-  const route = useRoute<SeparacaoScreenRouteProp>();
+  const navigation = useNavigation<ReprovadosScreenStackProp>();
+  const route = useRoute<ReprovadosScreenRouteProp>();
 
-  // Função para exibir os toasts
-  const showToast = (type: string, text1: string, text2: string) => {
+  const showToast = (type, txt1, txt2) => {
     Toast.show({
-      type,
-      text1,
-      text2,
+      type: type,
+      text1: txt1,
+      text2: txt2,
     });
   };
 
@@ -45,8 +47,7 @@ export default function Separacao() {
         if (isActive) {
           setLoading(true);
           try {
-            await cleanRespOrder(); // Limpar os pedidos anteriores
-            const responseOrders = await getOrders();
+            let responseOrders = await getOrdersForExchange();
             setOrders(responseOrders || []);
           } catch (error) {
             console.error("Error fetching orders:", error);
@@ -59,33 +60,33 @@ export default function Separacao() {
       }
       getOrdersList();
       return () => {
-        isActive = false; // Limpar o efeito quando o componente for desmontado
+        isActive = false; // Cleanup function to prevent state updates if component is unmounted
       };
-    }, [cleanRespOrder, getOrders])
+    }, [])
   );
 
-  // Exibir o toast ao receber parâmetros da rota
-  // Exibir o toast ao receber parâmetros da rota
   useEffect(() => {
     if (route.params?.toastType) {
       showToast(
         route.params.toastType,
-        route.params.toastText1 || "",
-        route.params.toastText2 || ""
+        route.params.toastText1,
+        route.params.toastText2
       );
+
+      // Limpar os parâmetros após exibir o toast
       navigation.setParams({
         toastType: undefined,
         toastText1: undefined,
         toastText2: undefined,
       });
     }
-  }, [route.params, navigation]);
+  }, [route.params]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       {orders.length === 0 ? (
         <Text style={styles.noOrdersText}>
-          Não existem pedidos para separar.
+          Não existem pedidos para trocar.
         </Text>
       ) : (
         <FlatList
@@ -108,7 +109,6 @@ const styles = StyleSheet.create({
   noOrdersText: {
     fontSize: 18,
     backgroundColor: colors.light.backgroudEmptyMsg,
-    borderRadius: 50,
     padding: 10,
     textAlign: "center",
     width: 300,
