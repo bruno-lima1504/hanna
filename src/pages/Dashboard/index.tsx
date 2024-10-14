@@ -61,6 +61,7 @@ export default function Dashboard() {
       <View style={styles.header}>
         <Text style={styles.welcomeText}>Bem vindo, {user.name}!</Text>
       </View>
+      
       <DashboardCard
         bgColor="#1E90FF"
         title="Separação"

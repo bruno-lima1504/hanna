@@ -68,7 +68,7 @@ export default function Conferir() {
           setCardInfo(responseOrders.itens_card || []);
           setProducts(responseOrders.itens_pedido || []);
           setAwaitItems(responseOrders.awaitItems || false);
-          setIsProductLoaded(true);
+          setIsProductLoaded(true);    
         }
       } catch (error) {
         console.error("Error fetching product order:", error);
@@ -105,14 +105,15 @@ export default function Conferir() {
 
   function finishSeparete() {
     setShowFinishButton(true);
-  }
+  }  
 
   async function handleFinishSeparate() {
     setIsLoading(true); // Iniciar carregamento
     try {
       const status = await saveCheckOutProducts(products, location);
+      console.log("return da conferencia", status)
       setIsLoading(false);
-      if (status !== 201) {
+      if (status !== 200) {
         throw new Error("Falha ao gravar conferência");
       }
       navigation.navigate("Conferencia", {
@@ -203,7 +204,7 @@ export default function Conferir() {
         }}
         autoFocus={true}
         keyboardType="default"
-        showSoftInputOnFocus={Platform.OS === "android" ? false : undefined} // Desabilitar o teclado no Android
+        showSoftInputOnFocus={Platform.OS === "android" ? false : undefined}
       />
       <FlatList
         data={cardInfo}
@@ -244,7 +245,7 @@ export default function Conferir() {
           handleCloseModal={() => {
             setModalLocationVisible(false);
           }}
-          onSaveLocation={handleSaveLocation} // Passa a função de callback para o modal
+          onSaveLocation={handleSaveLocation}
         />
       </Modal>
     </SafeAreaView>
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 10,
-    backgroundColor: "red", // Cor do botão
+    backgroundColor: "red",
     borderRadius: 5,
   },
   greenButton: {
@@ -286,10 +287,10 @@ const styles = StyleSheet.create({
   },
   hiddenInput: {
     position: "absolute",
-    top: -1000, // Mantém o input fora da tela
-    height: 0, // Sem altura visível
-    width: 0, // Sem largura visível
-    opacity: 0, // Totalmente transparente
+    top: -1000,
+    height: 0,
+    width: 0, 
+    opacity: 0, 
   },
   input: {
     height: 10,

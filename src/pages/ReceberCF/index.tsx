@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
 import {
   FlatList,
   SafeAreaView,
@@ -9,7 +9,7 @@ import {
   Modal,
 } from "react-native";
 
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 import { DrawerParamsList } from "../../routes/app.routes";
 import { AuthContext } from "../../contexts/AuthContext";
@@ -32,8 +32,9 @@ type RecebeCFScreenStackProp = NativeStackNavigationProp<
 export default function RecebeCF() {
   const [orders, setOrders] = useState([]);
   const [leitura, setLeitura] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [inputValue, setInputValue] = useState("");
-  const { receiveOrdersToCheckout } = useContext(AuthContext);
+  const { receiveOrdersToCheckout, cleanRespOrder } = useContext(AuthContext);
   const [receiveModalVisible, setReceiveModalVisible] = useState(false);
   const inputRef = useRef(null);
   const navigation = useNavigation<RecebeCFScreenStackProp>();
@@ -49,13 +50,39 @@ export default function RecebeCF() {
     return () => clearInterval(interval);
   }, []);
 
-  const showToast = (type, txt1, txt2) => {
+  const showToast = (type: string, txt1: string, txt2: string) => {
     Toast.show({
       type: type,
       text1: txt1,
       text2: txt2,
     });
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      async function getOrdersList() {
+        if (isActive) {
+          setLoading(true);
+          try {
+            await cleanRespOrder(); // Limpar os pedidos anteriores
+            const responseOrders = await receiveOrdersToCheckout();
+            setOrders(responseOrders || []);
+          } catch (error) {
+            console.error("Error fetching orders:", error);
+          } finally {
+            if (isActive) {
+              setLoading(false);
+            }
+          }
+        }
+      }
+      getOrdersList();
+      return () => {
+        isActive = false;
+      };
+    }, [cleanRespOrder, receiveOrdersToCheckout])
+  );
 
   useEffect(() => {
     if (route.params?.toastType) {
@@ -131,7 +158,7 @@ export default function RecebeCF() {
             }}
             autoFocus={true}
             keyboardType="default"
-            showSoftInputOnFocus={Platform.OS === "android" ? false : undefined} // Desabilitar o teclado no Android
+            showSoftInputOnFocus={Platform.OS === "android" ? false : undefined}
           />
           <FlatList
             data={orders}
@@ -176,5 +203,5 @@ const styles = StyleSheet.create({
   input: {
     height: 10,
     opacity: 0,
-  },
+  }
 });

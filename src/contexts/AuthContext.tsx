@@ -314,6 +314,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.log(dados);
       const response = await api.put("/savesepareteproducts", dados);
       const status = response.status;
+      console.log(status)
       return status;
     } catch (error) {
       if (error.response) {
@@ -420,7 +421,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
       // Pegue o status da resposta
       const status = response.status;
-
+      console.log("status no context: ", status)
       return status;
     } catch (error) {
       if (error.response) {
@@ -527,8 +528,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await api.post("/trocar", {
         pedido: pedido,
-      });
-      console.log(response.data);
+      });      
       return response.data as ProductOrderResponse;
     } catch (error) {
       console.log(error);
@@ -540,12 +540,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     products: ProductProps[]
   ): Promise<number | undefined> {
     try {
+      console.log(products)
       const userInfo = await AsyncStorage.getItem("@hannaStorage");
       let user = JSON.parse(userInfo || "{}");
 
       const requestBody = {
         products,
-        user: user.userId.toString(),
+        user: user.userId,
       };
 
       console.log(requestBody);
@@ -565,13 +566,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const userInfo = await AsyncStorage.getItem("@hanna");
       let user = JSON.parse(userInfo || "{}");
-      const data = {
+      const response = await api.put("/savereceivedcheckout", {
         pedido: pedido,
         user: user,
-      };
-      console.log(data);
-      const response = await api.put("/savereceivedcheckout", {
-        data,
       });
       console.log(response.data);
       if (response.status !== 201) {

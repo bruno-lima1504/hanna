@@ -32,8 +32,7 @@ export default function OrderList({ data }: OrderListProps) {
       RC: "ConferirCQ",
     };
 
-    const routeName = status[data.status_separacao];
-    console.log(routeName);
+    const routeName = status[data.status_separacao];    
     if (routeName) {
       navigation.navigate(routeName, {
         pedido: order,
@@ -63,7 +62,7 @@ export default function OrderList({ data }: OrderListProps) {
         Data Liberação: {formatarData(data.data_liberacao)}
       </Text>
       <Text style={styles.bodyText}>Quantidade: {data.quantidade_itens}</Text>
-      {data.controle_qualidade === "1" && data.libera_cont_qual !== "0" && (
+      {data.controle_qualidade === "1" && data.status_separacao === "BQ" && (
         <Text style={styles.alertText}>
           Enviar Pedido para o Controle de Qualidade
         </Text>

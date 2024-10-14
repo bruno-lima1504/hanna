@@ -2,7 +2,7 @@
   "expo": {
     "name": "hanna-log",
     "slug": "hanna-log",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./src/assets/images/HANNA-logo-icon.png",
     "scheme": "myapp",
