@@ -36,6 +36,7 @@ export function ModalReceive({ handleCloseModal, numPedido, idPedido }) {
         "Pedido recebido com sucesso",
         "Finalizar conferência!"
       );
+    
     } else {
       showToast("error", "Houve algum problema", "Pedido não foi recebido!");
     }

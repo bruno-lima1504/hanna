@@ -231,7 +231,7 @@ export default function Separar() {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={handlePrinter}
-            style={[styles.greenButton, styles.marginSpacing]} // Aplicar estilos
+            style={[styles.greenButton, styles.marginSpacing]}
           >
             <Text style={styles.textButton}>Imprimir Etiqueta</Text>
           </TouchableOpacity>
@@ -244,7 +244,7 @@ export default function Separar() {
           ) : (
             <TouchableOpacity
               onPress={handleFinishSeparate}
-              style={[styles.greenButton, styles.marginSpacing]} // Aplicar estilos
+              style={[styles.greenButton, styles.marginSpacing]}
             >
               <Text style={styles.textButton}>Finalizar</Text>
             </TouchableOpacity>

@@ -74,8 +74,7 @@ export default function ConferirCQ() {
 
         setCardInfo(responseOrders.itens_card || []);
         setProducts(updatedProducts || []);
-
-        setIsProductLoaded(true);
+        setIsProductLoaded(true);        
       } catch (error) {
         console.error("Error fetching product order:", error);
       }
@@ -97,7 +96,7 @@ export default function ConferirCQ() {
 
   useEffect(() => {
     if (isProductLoaded) {
-      const completScan = products.find((product) => !product.recebido);
+      const completScan = products.find((product) => !product.recebido);      
       if (!completScan) {
         console.log("Todos os produtos escaneados.");
         finishSeparete(true);
@@ -105,7 +104,7 @@ export default function ConferirCQ() {
     }
   }, [products, isProductLoaded]);
 
-  function finishSeparete(data) {
+  function finishSeparete(data: boolean) {
     setShowFinishButton(data);
   }
 
@@ -139,7 +138,7 @@ export default function ConferirCQ() {
   };
 
   function verifyItem() {
-    let item;
+    let item: any;
     const verifiyCode = products.find(
       (product) =>
         product.cod_prod === leitura[0] &&
@@ -151,13 +150,13 @@ export default function ConferirCQ() {
         (product) =>
           product.cod_prod === leitura[0] &&
           (product.num_serie === leitura[1] || product.lote === leitura[1]) &&
-          !product.conferido
+          product.recebido === false
       );
     } else {
       showToast("error", "Leitura Invalida", "Item não pertence ao pedido!");
       return;
     }
-    if (item) {
+    if (item) {      
       item.recebido = "1";
       setProducts([...products]);
       setCardInfo((prevCardInfo) =>
@@ -169,13 +168,13 @@ export default function ConferirCQ() {
               }
             : card
         )
-      );
+      );         
     } else {
       showToast("error", "Leitura Invalida", "Esse item ja foi conferido!");
       return;
     }
   }
-  const showToast = (type, txt1, txt2) => {
+  const showToast = (type: string, txt1: string, txt2: string) => {
     Toast.show({
       type: type,
       text1: txt1,

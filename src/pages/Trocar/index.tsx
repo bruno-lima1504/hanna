@@ -166,9 +166,7 @@ export default function Trocar() {
       }
       item.troca = "1";
       item.status_produto_atual = "CQ";
-
-      setProducts([...products]);
-      console.log(products);
+      setProducts([...products]);      
     } else {
       showToast("error", "Leitura Invalida", "Esse item ja foi conferido!");
       return;
@@ -194,7 +192,7 @@ export default function Trocar() {
         }}
         autoFocus={true}
         keyboardType="default"
-        showSoftInputOnFocus={Platform.OS === "android" ? false : undefined} // Desabilitar o teclado no Android
+        // showSoftInputOnFocus={Platform.OS === "android" ? false : undefined}
       />
       <FlatList
         data={products}
